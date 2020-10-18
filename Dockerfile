@@ -1,11 +1,13 @@
-FROM alpine:edge
+FROM vladus2000/alpine-base
 
-RUN apk --update --no-cache add pptpd ppp iptables && \
+RUN \
+    /update.sh && \
+    apk --no-cache add pptpd ppp iptables && \
     rm -rf /var/cache/apk/* && \
     echo 'option /etc/ppp/pptpd-options' > /etc/pptpd.conf && \
     echo 'pidfile /var/run/pptpd.pid' >> /etc/pptpd.conf && \
-    echo 'localip 192.168.127.1' >> /etc/pptpd.conf && \
-    echo 'remoteip 192.168.127.100-199' >> /etc/pptpd.conf && \
+    echo 'localip 192.168.69.1' >> /etc/pptpd.conf && \
+    echo 'remoteip 192.168.69.100-199' >> /etc/pptpd.conf && \
     echo 'name pptpd' > /etc/ppp/pptpd-options && \
     echo 'refuse-pap' >> /etc/ppp/pptpd-options && \
     echo 'refuse-chap' >> /etc/ppp/pptpd-options && \
@@ -21,15 +23,15 @@ RUN apk --update --no-cache add pptpd ppp iptables && \
     echo 'nologfd' >> /etc/ppp/pptpd-options
 
 EXPOSE 1723/tcp
- 
+
 CMD set -ex && \
     iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE && \
     if [[ "$LOCALDNS" -eq "1" ]]; then \
         echo 'ms-dns 127.0.0.1' >> /etc/ppp/pptpd-options && \
         echo 'nameserver 127.0.0.1' > /etc/resolv.conf ; \
     else \
-        echo -e 'ms-dns 8.8.8.8\nms-dns 223.5.5.5' >> /etc/ppp/pptpd-options && \
-        echo -e 'nameserver 8.8.8.8\nameserver 223.5.5.5' > /etc/resolv.conf; \
+        echo -e 'ms-dns 8.8.8.8\nms-dns 8.8.4.4' >> /etc/ppp/pptpd-options && \
+        echo -e 'nameserver 8.8.8.8\nameserver 8.8.4.4' > /etc/resolv.conf; \
     fi && \
     pptpd && \
-    syslogd -n -O /dev/stdout    
+    syslogd -n -O /dev/stdout

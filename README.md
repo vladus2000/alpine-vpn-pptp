@@ -29,7 +29,7 @@ docker run -d \
            --privileged \
            --net=host \
            -v {local_path_to_chap_secrets}:/etc/ppp/chap-secrets \
-           rattydave/alpine-vpn-pptp
+           vladus2000/alpine-vpn-pptp
 ````
 
 Edit your local _chap-secrets_ file, to add or modify VPN users whenever you need.
@@ -40,39 +40,5 @@ You can use any VPN (PPTP) client to connect to the service.
 To authenticate use credentials provided in _chap-secrets_ file.
 
 **Note:** Before starting container in `--net=host` mode, please read how networking in `host` mode works in Docker:
-https://docs.docker.com/reference/run/#mode-host
+https://docs.docker.com/network/host/
 
-## Using with adblocker
-
-##### VPN with AD BLOCKER #####
-
-This will is oznu/dns-ad-blocker as the DNS ad blocker. Then run the VPN with the local DNS setting.
-
-````
-docker run -d \
-           --restart unless-stopped \
-           --name DNS-AD-BLOCK \
-           -p 127.0.0.1:53:53/tcp -p 127.0.0.1:53:53/udp \
-           -e DNSCRYPT=1 -e DNS_CRYPT_SERVERS=adguard-dns \
-           oznu/dns-ad-blocker
-
-echo "user * password *" > /root/chap-secrets
-
-docker run -d \
-           --restart unless-stopped \
-           --privileged \
-           --name VPN \
-           --net=host \
-           -v /root/chap-secrets:/etc/ppp/chap-secrets \
-           -e "LOCALDNS=1" \
-           rattydave/alpine-vpn-pptp
-````
-
-## Notes for RANCHEROS
-
-If you are using rancheros you need the kernel-extras service enabled and running. This will enable the drivers that are required.
-
-````
-sudo ros service enable kernel-extras
-sudo ros service up kernel-extras
-````
